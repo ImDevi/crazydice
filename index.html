@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>crazydice</title>
+  <link rel="icon" type="image/png" href="crazydice_fav.png">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background-color: black;
+      color: white;
+      font-family: 'Lexend', sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-bottom: 3px solid #333;
+    }
+
+    .section:last-child {
+      border-bottom: none;
+    }
+
+    .title {
+      font-weight: 700;
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    .dice-container {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .die {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2em;
+      font-weight: 400;
+      color: black;
+      cursor: pointer;
+      user-select: none;
+      will-change: transform;
+      transition: transform 0.2s ease;
+      text-align: center;
+      padding: 5px;
+      overflow: hidden;
+    }
+
+    .die:hover {
+      transform: scale(1.1);
+    }
+
+    .rolling {
+      animation: roll 800ms ease;
+    }
+
+    @keyframes roll {
+      0%   { transform: rotate(0deg); }
+      25%  { transform: rotate(90deg); }
+      50%  { transform: rotate(180deg); }
+      75%  { transform: rotate(270deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .roll-all-btn {
+      background-color: #f6d125;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-family: 'Lexend', sans-serif;
+      font-weight: 700;
+      color: black;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .roll-all-btn:hover {
+      transform: scale(1.05);
+      background-color: #e0bd20;
+    }
+  </style>
+</head>
+<body>
+  <div class="section">
+    <div class="title">Setup</div>
+    <div class="dice-container">
+      <div class="die"></div>
+      <div class="die"></div>
+      <div class="die"></div>
+    </div>
+    <button class="roll-all-btn">Roll all</button>
+  </div>
+
+  <div class="section">
+    <div class="title">Story</div>
+    <div class="dice-container">
+      <div class="die"></div>
+      <div class="die"></div>
+      <div class="die"></div>
+    </div>
+    <button class="roll-all-btn">Roll all</button>
+  </div>
+
+  <div class="section">
+    <div class="title">Conclusion</div>
+    <div class="dice-container">
+      <div class="die"></div>
+      <div class="die"></div>
+      <div class="die"></div>
+    </div>
+    <button class="roll-all-btn">Roll all</button>
+  </div>
+
+  <script>
+    const dice = document.querySelectorAll('.die');
+
+    function fitText(die, word) {
+      die.textContent = word;
+      let fontSize = 32;
+      die.style.fontSize = fontSize + "px";
+      while (die.scrollWidth > die.clientWidth || die.scrollHeight > die.clientHeight) {
+        fontSize -= 2;
+        die.style.fontSize = fontSize + "px";
+        if (fontSize < 10) break;
+      }
+    }
+
+    async function getRandomWord() {
+      try {
+        const res = await fetch("https://random-word-api.herokuapp.com/word");
+        const data = await res.json();
+        return data[0];
+      } catch {
+        return "error";
+      }
+    }
+
+    dice.forEach(die => {
+      let isRolling = false;
+
+      const handleRoll = async () => {
+        if (isRolling) return;
+        isRolling = true;
+
+        die.classList.add('rolling');
+
+        const onAnimationEnd = async () => {
+          const word = await getRandomWord();
+          fitText(die, word);
+          die.classList.remove('rolling');
+          isRolling = false;
+          die.removeEventListener('animationend', onAnimationEnd);
+        };
+
+        die.addEventListener('animationend', onAnimationEnd);
+      };
+
+      die.addEventListener('click', handleRoll);
+      die.rollDie = handleRoll;
+    });
+
+    const rollAllButtons = document.querySelectorAll('.roll-all-btn');
+    rollAllButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sectionDice = btn.parentElement.querySelectorAll('.die');
+        sectionDice.forEach(die => {
+          die.rollDie();
+        });
+      });
+    });
+
+    window.addEventListener('load', () => {
+      dice.forEach(die => {
+        die.rollDie();
+      });
+    });
+  </script>
+</body>
+</html>
