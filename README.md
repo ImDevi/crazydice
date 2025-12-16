@@ -1,4 +1,6 @@
-**About crazydice**
+<img width="150" height="150" alt="image(6)" src="https://github.com/user-attachments/assets/ad000509-9f50-4393-9f6d-bbd632344ef4" />
+
+**crazydice**
 -----------------------------------------------------------------------------------------------
 **crazydice** is simple browser game inspired by *Story Cubes*. You roll nine dice and make up a
 story that must contain all words that were shown to you on the dice. Make sure to include a
